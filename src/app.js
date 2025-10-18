@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
 const ProvisionController = require('./controllers/provisionController');
 const AWS_Factory = require('./factories/awsFactory');
 const Azure_Factory = require('./factories/azureFactory');
@@ -8,6 +9,7 @@ const OnPremise_Factory = require('./factories/onPremiseFactory');
 
 const app = express();
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, '../dist')));
 
 const factories = {
   aws: new AWS_Factory(),
@@ -49,6 +51,10 @@ app.post('/api/v1/template/clone', async (req, res) => {
     console.error(err);
     res.status(400).json({ status: 'error', message: err.message });
   }
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
