@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProvisionController } from '../../controllers/ProvisionController.js';
 import { TemplateController } from '../../controllers/TemplateController.js';
+import { ConfigService } from '../../services/ConfigService.js';
 import { ProvisionForm } from '../components/ProvisionForm.jsx';
 import { InfrastructureResult } from '../components/InfrastructureResult.jsx';
 import { TemplateManager } from '../components/TemplateManager.jsx';
@@ -10,6 +11,24 @@ export const HomePage = () => {
   const [infrastructure, setInfrastructure] = useState(null);
   const [notification, setNotification] = useState({ message: '', type: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const [config, setConfig] = useState(null);
+
+  const configService = React.useMemo(() => new ConfigService(), []);
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const configData = await configService.loadConfig();
+        setConfig(configData);
+      } catch (error) {
+        setNotification({
+          message: 'Error al cargar configuración. Verifica que el backend esté corriendo en puerto 3000',
+          type: 'error'
+        });
+      }
+    };
+    loadConfig();
+  }, [configService]);
 
   const provisionController = React.useMemo(() => {
     const controller = new ProvisionController();
@@ -86,10 +105,15 @@ export const HomePage = () => {
       <div className="main-content">
         <div className="content-section">
           <h2>Nueva Infraestructura</h2>
-          <ProvisionForm
-            onSubmit={handleProvision}
-            isLoading={isLoading}
-          />
+          {config ? (
+            <ProvisionForm
+              onSubmit={handleProvision}
+              isLoading={isLoading}
+              config={config}
+            />
+          ) : (
+            <div className="loading-message">Cargando configuración...</div>
+          )}
         </div>
 
         {infrastructure && (

@@ -5,6 +5,8 @@ Multi-Cloud API (Abstract Factory + Builder + Prototype + Director)
 Sistema de aprovisionamiento multi-nube con backend en Node.js/Express y frontend en React.
 Implementa los patrones de diseño Abstract Factory, Builder, Prototype y Director.
 
+**Frontend y Backend están completamente separados y pueden ejecutarse en servidores diferentes.**
+
 ## Arquitectura del Frontend (MVC + SOLID)
 
 ### Estructura de Carpetas
@@ -61,31 +63,37 @@ frontend/
 
 ## Instalación y Uso
 
-### Backend
+### Opción 1: Ejecutar Backend y Frontend por Separado (Recomendado)
+
+#### Terminal 1 - Backend
 ```bash
+cd backend
 npm install
 npm start
 ```
-El servidor backend estará disponible en http://localhost:3000
+El servidor backend estará disponible en `http://localhost:3000`
 
-### Frontend (Desarrollo)
+#### Terminal 2 - Frontend
 ```bash
+cd frontend
+npm install
 npm run dev
 ```
-El frontend de desarrollo estará disponible en http://localhost:5173
+El frontend estará disponible en `http://localhost:5173`
 
-### Build del Frontend
+### Opción 2: Build de Frontend para Producción
 ```bash
+cd frontend
+npm install
 npm run build
 ```
-Genera los archivos optimizados en la carpeta `dist/`
+Los archivos compilados estarán en `frontend/dist/`
 
-### Producción
-```bash
-npm run build
-npm start
-```
-El backend servirá el frontend compilado en http://localhost:3000
+### Configuración
+- El backend corre en puerto **3000**
+- El frontend corre en puerto **5173**
+- El frontend se conecta automáticamente al backend en `http://localhost:3000`
+- CORS está habilitado en el backend para permitir conexiones desde el frontend
 
 ## Endpoints API
 
@@ -126,12 +134,16 @@ El backend servirá el frontend compilado en http://localhost:3000
 
 ## Características del Frontend
 
-- ✅ Interfaz intuitiva para seleccionar proveedores cloud
-- ✅ Formularios validados con feedback visual
+- ✅ Interfaz visual para seleccionar proveedores cloud (AWS, Azure, GCP, On-Premise)
+- ✅ **Selects dinámicos** - El usuario selecciona opciones, no escribe
+- ✅ Selección de categorías y tipos de máquinas según el proveedor elegido
+- ✅ Selección de regiones específicas por proveedor
+- ✅ Selección de tipos de almacenamiento
+- ✅ Carga automática de configuraciones desde el backend
 - ✅ Visualización de resultados en tarjetas organizadas
 - ✅ Sistema de notificaciones para feedback de operaciones
 - ✅ Gestión de templates (guardar y clonar)
-- ✅ Diseño responsive y moderno
+- ✅ Diseño responsive y moderno con gradientes
 - ✅ Animaciones y transiciones suaves
 - ✅ Arquitectura MVC con separación clara de responsabilidades
 - ✅ Implementación de principios SOLID
@@ -149,11 +161,40 @@ El backend servirá el frontend compilado en http://localhost:3000
 - Node.js
 - Express.js
 - Body-parser
+- CORS
 
 ### Frontend
 - React 18
 - Vite 5
 - CSS3 (Variables CSS, Grid, Flexbox)
 
+## Estructura del Proyecto
+
+```
+project/
+├── backend/               # Backend independiente
+│   ├── src/
+│   │   ├── app.js        # Servidor Express con CORS
+│   │   ├── controllers/
+│   │   ├── core/
+│   │   ├── builders/
+│   │   ├── factories/
+│   │   └── models/
+│   ├── tests/
+│   └── package.json
+│
+├── frontend/             # Frontend independiente
+│   ├── src/
+│   │   ├── models/       # Modelos (M)
+│   │   ├── controllers/  # Controladores (C)
+│   │   ├── views/        # Vistas (V)
+│   │   ├── services/     # Servicios API
+│   │   └── styles/
+│   ├── index.html
+│   └── package.json
+│
+└── README.md
+```
+
 ## Tests
-Use `tests/provisioner.rest` con VSCode REST Client para probar los endpoints
+Use `backend/tests/provisioner.rest` con VSCode REST Client para probar los endpoints

@@ -344,6 +344,20 @@ body {
   opacity: 1;
 }
 
+.loading-message {
+  text-align: center;
+  padding: calc(var(--spacing) * 4);
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.form-select:disabled,
+.form-input:disabled {
+  background-color: var(--background);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 @media (max-width: 768px) {
   .home-page {
     padding: calc(var(--spacing) * 2);

@@ -1,5 +1,5 @@
 export class ApiService {
-  constructor(baseURL = '/api/v1') {
+  constructor(baseURL = 'http://localhost:3000/api/v1') {
     this.baseURL = baseURL;
   }
 

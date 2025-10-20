@@ -1,9 +1,36 @@
-export class ProvisioningDirector {
-  constructor(builder) {
+class ProvisioningDirector {
+  constructor() {
+    this.builder = null;
+  }
+
+  setBuilder(builder) {
     this.builder = builder;
   }
 
-  static MACHINE_TYPES = {
+  async construct(params) {
+    const { choice, builderType, specs } = params;
+    if (this.builder) {
+      this.builder.reset();
+      if (choice) this.builder.setFlavor(choice);
+      if (specs) {
+        if (specs.region || specs.size || specs.name) {
+          this.builder.setVMSpec(specs);
+        }
+        this.builder.setNetworkSpec(specs);
+        this.builder.setStorageSpec(specs);
+      }
+      await this.builder.buildNetwork();
+      await this.builder.buildStorage();
+      await this.builder.buildVM();
+    }
+  }
+
+  getResult() {
+    return this.builder ? this.builder.getResult() : null;
+  }
+}
+
+ProvisioningDirector.MACHINE_TYPES = {
     AWS: {
       "General Purpose": {
         "t3.medium": { vcpu: 2, ram: 4 },
@@ -74,31 +101,18 @@ export class ProvisioningDirector {
     },
   };
 
-  buildProvisioning(config) {
-    const { provider, machineCategory, machineType } = config;
+ProvisioningDirector.REGIONS = {
+  AWS: ['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1'],
+  AZURE: ['eastus', 'westeurope', 'southeastasia', 'westus2'],
+  GCP: ['us-central1', 'europe-west1', 'asia-east1', 'us-west1'],
+  ONPREM: ['datacenter-1', 'datacenter-2', 'datacenter-3']
+};
 
-    // Obtiene specs de vCPU y RAM
-    const providerKey = provider.toUpperCase();
-    const category = ProvisioningDirector.MACHINE_TYPES[providerKey]?.[machineCategory];
-    const type = category?.[machineType];
+ProvisioningDirector.STORAGE_TYPES = {
+  AWS: ['gp3', 'io2', 'st1', 'sc1'],
+  AZURE: ['Premium_LRS', 'Standard_LRS', 'StandardSSD_LRS'],
+  GCP: ['pd-standard', 'pd-ssd', 'pd-balanced'],
+  ONPREM: ['local-ssd', 'network-storage', 'san-storage']
+};
 
-    if (!type) {
-      throw new Error(`Tipo de máquina inválido: ${providerKey} ${machineCategory} ${machineType}`);
-    }
-
-    // Configura el builder
-    this.builder.reset();
-    this.builder.setVMConfig({
-      name: config.name,
-      os: config.os,
-      vcpu: type.vcpu,
-      ram: type.ram,
-      region: config.region,
-    });
-
-    this.builder.setNetworkConfig(config.network);
-    this.builder.setStorageConfig(config.storage);
-
-    return this.builder.getProvisioning();
-  }
-}
+module.exports = ProvisioningDirector;

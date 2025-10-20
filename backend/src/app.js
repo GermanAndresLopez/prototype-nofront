@@ -1,15 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
+const cors = require('cors');
 const ProvisionController = require('./controllers/provisionController');
+const ProvisioningDirector = require('./core/provisioningDirector');
 const AWS_Factory = require('./factories/awsFactory');
 const Azure_Factory = require('./factories/azureFactory');
 const GCP_Factory = require('./factories/gcpFactory');
 const OnPremise_Factory = require('./factories/onPremiseFactory');
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../dist')));
 
 const factories = {
   aws: new AWS_Factory(),
@@ -19,6 +20,17 @@ const factories = {
 };
 
 const controller = new ProvisionController(factories);
+
+app.get('/api/v1/config', (req, res) => {
+  const config = {
+    providers: ['aws', 'azure', 'gcp', 'onpremise'],
+    builderTypes: ['standard', 'premium', 'basic'],
+    machineTypes: ProvisioningDirector.MACHINE_TYPES,
+    regions: ProvisioningDirector.REGIONS,
+    storageTypes: ProvisioningDirector.STORAGE_TYPES
+  };
+  res.json(config);
+});
 
 app.post('/api/v1/provision', async (req, res) => {
   try {
@@ -51,10 +63,6 @@ app.post('/api/v1/template/clone', async (req, res) => {
     console.error(err);
     res.status(400).json({ status: 'error', message: err.message });
   }
-});
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
